@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<canvas id="cas" width="600" height="400" style="border: 1px solid black"></canvas>
+<script>
+    var cas = document.getElementById("cas");
+    var ctx = cas.getContext("2d");
+
+    function randomRGB(){
+        //生成一个
+        var r = parseInt(Math.random()*255)
+        var g = parseInt(Math.random()*255)
+        var b = parseInt(Math.random()*255)
+        return "rgb("+r+","+g+","+b+")"
+    }
+
+    function toRadian(angle){
+        return Math.PI*angle/180
+    }
+
+
+
+    // 构造函数
+    function DrawPie(option){
+        //构造函数内部应该尽量精简一点。
+       this.init(option);
+    }
+
+    //
+
+    DrawPie.prototype.init=function(option){
+        this.ctx= option.ctx;
+        this.data = data;
+        //绘制饼状图的坐标
+        this.x = option.x;
+        this.y = option.y;
+        //半径
+        this.radius= option.radius;
+        //起始角度
+        this.startAngle = toRadian(option.startAngle);
+        this.calculateAngle()
+
+
+    };
+    DrawPie.prototype.sum = function(data){
+       /* return data.reduce(function(start,end){
+
+
+            return start.count+end.count;
+
+
+        })*/
+
+       var sum = 0;
+       data.forEach(function(item){
+           sum+=item.count;
+       })
+        return sum;
+    }
+
+    DrawPie.prototype.calculateAngle =function(){
+        // 求每一项所占的角度
+        //先求和再计算比例
+        var sum = this.sum(this.data);
+
+        this.data.forEach(function(item){
+            //计算百分比
+            //转换成弧度
+            item.count = item.count/sum*Math.PI*2;
+        })
+    };
+
+    DrawPie.prototype.draw =function(){
+
+        for(var i=0;i<this.data.length;i++){
+
+            this.ctx.beginPath();
+            this.ctx.moveTo(this.x,this.y);
+            var color = randomRGB();
+            this.ctx.fillStyle = color;
+            this.ctx.strokeStyle = color;
+
+
+            this.ctx.arc(this.x,this.y,this.radius,this.startAngle,this.startAngle+=this.data[i].count);
+
+            this.ctx.fill()
+
+            //moveTo到圆心
+
+            this.ctx.beginPath()
+
+            this.ctx.moveTo(this.x,this.y)
+            var x0 = this.x+(this.radius+10)*Math.cos(this.startAngle-this.data[i].count/2);
+            var y0 = this.y+(this.radius+10)*Math.sin(this.startAngle-this.data[i].count/2);
+
+
+            this.ctx.lineTo(x0, y0);
+
+
+
+
+            if(x0<this.x){
+                this.ctx.textAlign ="right";
+                this.ctx.lineTo(x0-this.ctx.measureText(this.data[i].title).width,y0)
+            }else{
+                this.ctx.textAlign = "left";
+                this.ctx.lineTo(x0+this.ctx.measureText(this.data[i].title).width,y0)
+            }
+
+            this.ctx.stroke()
+            this.ctx.fillText(this.data[i].title,x0,y0-5);
+
+        }
+
+
+
+
+
+
+    }
+    var data = [
+        {
+            count:100,
+            title:"西瓜"
+        },
+        {
+            count:200,
+            title:"草莓"
+        },
+        {
+            count:150,
+            title:"石榴12312"
+        },
+        {
+            count:270,
+            title:"樱桃asdasdasd"
+        },
+        {
+            count:220,
+            title:"黄瓜"
+        }
+
+    ]
+
+
+
+    var pie = new DrawPie({
+        ctx:ctx,
+        data:data,
+        x:cas.width/2,
+        y:cas.height/2,
+        startAngle:0,
+        radius:150
+    });
+
+    pie.draw()
+
+
+
+</script>
+</body>
+</html>
